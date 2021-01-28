@@ -19,6 +19,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_qr_scanner.*
+import me.orbitalno11.qrscanner.listener.ScannerListener
 import java.io.Serializable
 import java.lang.Exception
 import java.nio.ByteBuffer
@@ -33,28 +34,22 @@ class QRScannerActivity: AppCompatActivity() {
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
         @JvmStatic
-        fun createIntent(mContext: Context): Intent {
-            return Intent(mContext, QRScannerActivity::class.java)
+        fun createIntent(mContext: Context, listener: ScannerListener): Intent {
+            return Intent(mContext, QRScannerActivity::class.java).apply {
+                putExtra(QR_LISTENER, listener)
+            }
         }
     }
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
 
-    private var mQRScannerListener: QRListener? = object : QRListener {
-        override fun onSuccess(value: String?) {
-            Log.e("QR CODE", "CODE: $value")
-        }
-
-        override fun onFailure(value: Exception) {
-            Log.e("QR CODE", "ERROR: $value")
-        }
-
-    }
+    private var mQRScannerListener: ScannerListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr_scanner)
+        extractExtra(intent.extras)
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -67,7 +62,7 @@ class QRScannerActivity: AppCompatActivity() {
 
     private fun extractExtra(bundle: Bundle?) {
         bundle?.let { b ->
-            mQRScannerListener = b.getSerializable(QR_LISTENER) as? QRListener
+            mQRScannerListener = b.getSerializable(QR_LISTENER) as? ScannerListener
         }
     }
 
@@ -134,7 +129,7 @@ class QRScannerActivity: AppCompatActivity() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private inner class QRAnalyzer(private val listener: QRListener?) : ImageAnalysis.Analyzer {
+    private inner class QRAnalyzer(private val listener: ScannerListener?) : ImageAnalysis.Analyzer {
         private val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
             .build()
@@ -173,10 +168,5 @@ class QRScannerActivity: AppCompatActivity() {
             }
             image.close()
         }
-    }
-
-    interface QRListener: Serializable {
-        fun onSuccess(value: String?)
-        fun onFailure(value: Exception)
     }
 }
