@@ -6,5 +6,6 @@ enum class ScannerResult(val value: String) {
 }
 
 enum class ScannerResponse(val value: Int) {
-    REQUEST_CODE(101),
+    REQUEST_CODE(1112),
+    QR_RESULT_CODE(1113)
 }

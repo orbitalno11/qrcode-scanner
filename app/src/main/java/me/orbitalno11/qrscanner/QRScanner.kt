@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -160,16 +161,12 @@ class QRScanner: AppCompatActivity() {
             val result = Intent().apply {
                 putExtra(ScannerResult.QR_SUCCESS_RESULT_CODE.value, value)
             }
-            setResult(ScannerResponse.REQUEST_CODE.value, result)
+            setResult(ScannerResponse.QR_RESULT_CODE.value, result)
             finish()
         }
 
         override fun onFailure(value: Exception) {
-            val result = Intent().apply {
-                putExtra(ScannerResult.QR_FAILURE_RESULT_CODE.value, value)
-            }
-            setResult(ScannerResponse.REQUEST_CODE.value, result)
-            finish()
+            Log.d(QRScanner::class.simpleName, value.toString())
         }
     }
 }
