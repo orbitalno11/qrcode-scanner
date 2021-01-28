@@ -4,5 +4,5 @@ import java.lang.Exception
 
 interface ScannerListener {
     fun onSuccess(value: String?)
-    fun onFailure(value: Exception)
+    fun onFailure(error: Exception)
 }

@@ -159,14 +159,19 @@ class QRScanner: AppCompatActivity() {
     private inner class QRScannerListener: ScannerListener {
         override fun onSuccess(value: String?) {
             val result = Intent().apply {
-                putExtra(ScannerResult.QR_SUCCESS_RESULT_CODE.value, value)
+                putExtra(ScannerResult.QR_SUCCESS_RESULT.value, value)
             }
             setResult(ScannerResponse.QR_RESULT_CODE.value, result)
             finish()
         }
 
-        override fun onFailure(value: Exception) {
-            Log.d(QRScanner::class.simpleName, value.toString())
+        override fun onFailure(error: Exception) {
+            Log.d(QRScanner::class.simpleName, error.toString())
+            val result = Intent().apply {
+                putExtra(ScannerResult.QR_FAILURE_RESULT.value, error)
+            }
+            setResult(ScannerResponse.QR_RESULT_CODE.value, result)
+            finish()
         }
     }
 }
