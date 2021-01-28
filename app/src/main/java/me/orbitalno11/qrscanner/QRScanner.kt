@@ -6,8 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcelable
-import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -17,39 +15,32 @@ import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_qr_scanner.*
 import me.orbitalno11.qrscanner.listener.ScannerListener
-import java.io.Serializable
+import me.orbitalno11.qrscanner.model.ScannerResponse
+import me.orbitalno11.qrscanner.model.ScannerResult
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class QRScannerActivity: AppCompatActivity() {
+class QRScanner: AppCompatActivity() {
     companion object {
-        const val QR_LISTENER = "qr_listener"
-
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
         @JvmStatic
-        fun createIntent(mContext: Context, listener: ScannerListener): Intent {
-            return Intent(mContext, QRScannerActivity::class.java).apply {
-                putExtra(QR_LISTENER, listener)
-            }
+        fun createIntent(mContext: Context): Intent {
+            return Intent(mContext, QRScanner::class.java)
         }
     }
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
 
-    private var mQRScannerListener: ScannerListener? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr_scanner)
-        extractExtra(intent.extras)
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -58,12 +49,6 @@ class QRScannerActivity: AppCompatActivity() {
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-    }
-
-    private fun extractExtra(bundle: Bundle?) {
-        bundle?.let { b ->
-            mQRScannerListener = b.getSerializable(QR_LISTENER) as? ScannerListener
-        }
     }
 
     override fun onRequestPermissionsResult(
@@ -102,7 +87,7 @@ class QRScannerActivity: AppCompatActivity() {
             val analyzer = ImageAnalysis.Builder()
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, QRAnalyzer(mQRScannerListener))
+                    it.setAnalyzer(cameraExecutor, QRAnalyzer(QRScannerListener()))
                 }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -167,6 +152,22 @@ class QRScannerActivity: AppCompatActivity() {
                 listener?.onFailure(error)
             }
             image.close()
+        }
+    }
+
+    private inner class QRScannerListener: ScannerListener {
+        override fun onSuccess(value: String?) {
+            val result = Intent().apply {
+                putExtra(ScannerResult.QR_SUCCESS_RESULT_CODE.value, value)
+            }
+            setResult(ScannerResponse.REQUEST_CODE.value, result)
+        }
+
+        override fun onFailure(value: Exception) {
+            val result = Intent().apply {
+                putExtra(ScannerResult.QR_FAILURE_RESULT_CODE.value, value)
+            }
+            setResult(ScannerResponse.REQUEST_CODE.value, result)
         }
     }
 }

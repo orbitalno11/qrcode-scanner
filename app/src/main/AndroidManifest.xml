@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.QRScanner">
-        <activity android:name=".QRScannerActivity">
+        <activity android:name=".QRScanner">
         </activity>
     </application>
 
