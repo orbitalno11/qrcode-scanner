@@ -161,6 +161,7 @@ class QRScanner: AppCompatActivity() {
                 putExtra(ScannerResult.QR_SUCCESS_RESULT_CODE.value, value)
             }
             setResult(ScannerResponse.REQUEST_CODE.value, result)
+            finish()
         }
 
         override fun onFailure(value: Exception) {
@@ -168,6 +169,7 @@ class QRScanner: AppCompatActivity() {
                 putExtra(ScannerResult.QR_FAILURE_RESULT_CODE.value, value)
             }
             setResult(ScannerResponse.REQUEST_CODE.value, result)
+            finish()
         }
     }
 }
