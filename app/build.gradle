@@ -2,8 +2,9 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-android-extensions'
-    id 'maven-publish'
 }
+
+apply from: file('publish.gradle')
 
 def camerax_version = "1.0.0-beta07"
 def barcode_scanner_version = "16.0.3"
@@ -51,50 +52,4 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation "com.google.mlkit:barcode-scanning:$barcode_scanner_version"
-}
-
-task sourceJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set("sources")
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId "me.oribtalno11"
-            artifactId "qr-scanner"
-            version "2.0.0-beta"
-            artifact sourceJar
-            artifact "$buildDir/outputs/aar/app-release.aar"
-
-            pom {
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-
-                    project.configurations.implementation.allDependencies.each {
-                        if (it.group != null || it.name != null || it.version != null || it.name == "unspecified") return
-
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            def propsFile = rootProject.file('github.properties')
-            def props = new Properties()
-            props.load(new FileInputStream(propsFile))
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/orbitalno11/qrcode-scanner")
-            credentials {
-                username props['username']
-                password props['token']
-            }
-        }
-    }
 }
